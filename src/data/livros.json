@@ -1,7 +1,16 @@
-{
+[
+  {
     "id": 1,
     "titulo": "Clean Code",
     "autor": "Robert C. Martin",
     "categoria": "Programação",
     "ano": 2008
-}
+  },
+  {
+    "id": 2,
+    "titulo": "Novo Livro",
+    "autor": "Autor",
+    "categoria": "Categ",
+    "ano": 2025
+  }
+]
