@@ -1,6 +1,13 @@
+const fs = require("fs");
+const path = require("path");
 const Livro = require("../models/livro.model");
 const RepositoryBase = require("./repository.interface");
 class LivrosRepository extends RepositoryBase {
+  constructor() {
+    super();
+    this.caminhoArquivo = path.join(__dirname, "../data/livros.json");
+  }
+
   async findAll() {
   const dados = await this._lerArquivo();
   const lista = JSON.parse(dados);
@@ -46,6 +53,14 @@ class LivrosRepository extends RepositoryBase {
   await this._saveToFile(livros.map(l => l.toJSON())); // <<< ALTERAÇÃO
   return livroRemovido;
  }
+
+ async _saveToFile(data) {
+    fs.writeFileSync(this.caminhoArquivo, JSON.stringify(data, null, 2), "utf8");
+  }
+
+  async _lerArquivo() {
+    return await fs.promises.readFile(this.caminhoArquivo, "utf8");
+  }
 
 }
 module.exports = LivrosRepository;
