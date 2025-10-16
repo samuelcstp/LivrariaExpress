@@ -1,6 +1,4 @@
 const Livro = require("../models/livro.model");
-const fs = require("fs");
-const path = require("path");
 const RepositoryBase = require("./repository.interface");
 class LivrosRepository extends RepositoryBase {
   async findAll() {
