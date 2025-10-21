@@ -16,13 +16,13 @@ class LivrosRepository {
     "INSERT INTO livros (titulo, autor, categoria, ano, editora, numPag) VALUES (?, ?, ?, ?, ?, ?)",
     [novo.titulo, novo.autor, novo.categoria, novo.ano, novo.editora, novo.numPag]
   );
-  return this.findById(res.lastInsertRowid); // corrigido aqui
+  return this.findById(res.lastInsertRowid);
 }
 
 async update(id, dados) {
   const atual = new Livro({ id, ...dados });
   await db.run(
-    "UPDATE livros SET titulo = ?, autor = ?, categoria = ?, ano = ?, editora = ?, numPag = ? WHERE id = ?", // corrigido aqui
+    "UPDATE livros SET titulo = ?, autor = ?, categoria = ?, ano = ?, editora = ?, numPag = ? WHERE id = ?",
     [atual.titulo, atual.autor, atual.categoria, atual.ano, atual.editora, atual.numPag, id]
   );
   return this.findById(id);
