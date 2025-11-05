@@ -7,24 +7,25 @@ class AuthController {
   }
 
   async register(req, res, next) {
-    try {
-      const { username, password } = req.body;
-      if (!username || !password) {
-        return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios.' });
-      }
-
-      const exists = await this.usersRepo.findByUsername(username);
-      if (exists) return res.status(409).json({ erro: 'Usuário já existe.' });
-
-      const hash = await bcrypt.hash(password, 10);
-      const user = await this.usersRepo.create({ username, passwordHash: hash });
-
-      req.session.userId = user.id;
-      res.status(201).json({ mensagem: 'Usuário registrado com sucesso!', user: user.toJSON() });
-    } catch (err) {
-      next(err);
+  try {
+    const { username, email, nome_completo, password } = req.body;
+    if (!username || !email || !nome_completo || !password) {
+      return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios.' });
     }
+
+    const exists = await this.usersRepo.findByUsername(username);
+    if (exists) return res.status(409).json({ erro: 'Usuário já existe.' });
+
+    const hash = await bcrypt.hash(password, 10);
+    const user = await this.usersRepo.create({ username, email, nome_completo, passwordHash: hash });
+
+    req.session.userId = user.id;
+    res.status(201).json({ mensagem: 'Usuário registrado com sucesso!', user: user.toJSON() });
+  } catch (err) {
+    next(err);
   }
+}
+
 
   async login(req, res, next) {
     try {
@@ -32,10 +33,12 @@ class AuthController {
       const user = await this.usersRepo.findByUsername(username);
       if (!user) return res.status(401).json({ erro: 'Usuário ou senha inválidos.' });
 
-      const valid = await bcrypt.compare(password, user.password);
+      const valid = await bcrypt.compare(password, user.passwordHash);
+
       if (!valid) return res.status(401).json({ erro: 'Usuário ou senha inválidos.' });
 
       req.session.userId = user.id;
+      console.log('Sessão salva:', req.session);
       res.status(200).json({ mensagem: 'Login realizado com sucesso!', user: user.toJSON() });
     } catch (err) {
       next(err);
