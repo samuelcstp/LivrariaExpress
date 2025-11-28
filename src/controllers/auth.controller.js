@@ -1,68 +1,52 @@
 const bcrypt = require('bcrypt');
 const UsersRepository = require('../repositories/users.repository');
+const User = require('../models/user.model');
 
 class AuthController {
-  constructor() {
-    this.usersRepo = new UsersRepository();
-  }
-
-  async register(req, res, next) {
-  try {
-    const { username, email, nome_completo, password } = req.body;
-    if (!username || !email || !nome_completo || !password) {
-      return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios.' });
+    constructor() {
+        this.usersRepository = new UsersRepository();
     }
 
-    const exists = await this.usersRepo.findByUsername(username);
-    if (exists) return res.status(409).json({ erro: 'Usuário já existe.' });
-
-    const hash = await bcrypt.hash(password, 10);
-    const user = await this.usersRepo.create({ username, email, nome_completo, passwordHash: hash });
-
-    req.session.userId = user.id;
-    res.status(201).json({ mensagem: 'Usuário registrado com sucesso!', user: user.toJSON() });
-  } catch (err) {
-    next(err);
-  }
-}
-
-
-  async login(req, res, next) {
-    try {
-      const { username, password } = req.body;
-      const user = await this.usersRepo.findByUsername(username);
-      if (!user) return res.status(401).json({ erro: 'Usuário ou senha inválidos.' });
-
-      const valid = await bcrypt.compare(password, user.passwordHash);
-
-      if (!valid) return res.status(401).json({ erro: 'Usuário ou senha inválidos.' });
-
-      req.session.userId = user.id;
-      console.log('Sessão salva:', req.session);
-      res.status(200).json({ mensagem: 'Login realizado com sucesso!', user: user.toJSON() });
-    } catch (err) {
-      next(err);
+    async register(req, res, next) {
+        try {
+            const { username, password } = req.body;
+            const userInput = new User({ username, password });
+            const existing = await this.usersRepository.findByUsername(userInput.username);
+            if (existing) { const e = new Error('Usuário já existe'); e.statusCode = 409; throw e; }
+            const passwordHash = await bcrypt.hash(String(password), 10);
+            const created = await this.usersRepository.create({ username: userInput.username, passwordHash });
+            req.session.userId = created.id;
+            res.status(201).json({ mensagem: 'Usuário registrado com sucesso', user: created });
+        } catch (err) { next(err); }
     }
-  }
-
-  async me(req, res, next) {
-    try {
-      if (!req.session.userId) return res.status(401).json({ erro: 'Não autenticado.' });
-
-      const user = await this.usersRepo.findById(req.session.userId);
-      if (!user) return res.status(404).json({ erro: 'Usuário não encontrado.' });
-
-      res.status(200).json({ user: user.toJSON() });
-    } catch (err) {
-      next(err);
+    async login(req, res, next) {
+        try {
+            const { username, password } = req.body;
+            if (!username || !password) { const e = new Error('Credenciais inválidas'); e.statusCode = 400; throw e; }
+            const row = await this.usersRepository.findByUsername(username);
+            if (!row || !(await bcrypt.compare(String(password), row.password_hash))) {
+                const e = new Error('Usuário ou senha inválidos'); e.statusCode = 401; throw e;
+            }
+            req.session.userId = row.id;
+            const user = User.fromDB(row);
+            res.status(200).json({ mensagem: 'Login efetuado', user });
+        } catch (err) { next(err); }
     }
-  }
 
-  async logout(req, res, next) {
-    req.session.destroy(() => {
-      res.status(200).json({ mensagem: 'Logout realizado com sucesso.' });
-    });
-  }
+    async me(req, res, next) {
+        try {
+            if (!req.session.userId) return res.status(401).json({ erro: 'Não autenticado' });
+            const user = await this.usersRepository.findById(req.session.userId);
+            if (!user) return res.status(401).json({ erro: 'Sessão inválida' });
+            res.status(200).json(user);
+        } catch (err) { next(err); }
+    }
+
+
+    async logout(req, res, next) {
+        try { req.session.destroy(err => err ? next(err) : res.status(200).json({ mensagem: 'Logout realizado com sucesso.' })); }
+        catch (err) { next(err); }
+    }
 }
 
 module.exports = AuthController;
