@@ -34,6 +34,10 @@ module.exports = (sequelize, DataTypes) => {
         isInt: { msg: 'Ano deve ser um número válido' }
       }
     },
+    capa_url: { // 👈 NOVO CAMPO ADICIONADO
+      type: DataTypes.STRING,
+      allowNull: true, // A URL da capa é opcional
+    },
   }, {
     tableName: 'livros',
     timestamps: false,

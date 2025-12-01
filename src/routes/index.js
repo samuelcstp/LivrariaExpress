@@ -2,7 +2,9 @@ const express = require("express");
 const router = express.Router();
 
 const livrosRoutes = require("./livros.routes");
-const authRoutes = require("./auth.routes"); 
+const authRoutes = require("./auth.routes");
+const reviewRoutes = require("./review.routes");
+
 
 router.get("/", (req, res) => {
   res.status(200).json({
@@ -11,6 +13,9 @@ router.get("/", (req, res) => {
 });
 
 router.use("/livros", livrosRoutes);
-router.use("/auth", authRoutes); 
+router.use("/auth", authRoutes);
+router.use("/reviews", reviewRoutes);
+
+
 
 module.exports = router;

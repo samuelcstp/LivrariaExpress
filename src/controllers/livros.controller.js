@@ -1,9 +1,11 @@
+// src/controllers/livros.controller.js
 const LivrosRepository = require("../repositories/livros.repository");
 
 class LivrosController {
     constructor() {
         this.livrosRepository = new LivrosRepository();
     }
+    // ... (listarLivros e buscarLivroPorId não precisam de alteração no controller)
 
     async listarLivros(req, res, next) {
         const livros = await this.livrosRepository.findAll();
@@ -20,12 +22,16 @@ class LivrosController {
     }
 
     async criarLivro(req, res, next) {
-        const { titulo, autor, categoria, ano } = req.body;
+        // 👈 Incluído capa_url na desestruturação
+        const { titulo, autor, categoria, ano, editora, capa_url } = req.body;
+        
         const novoLivro = await this.livrosRepository.create({
             titulo,
             autor,
             categoria,
-            ano: parseInt(ano)
+            ano: parseInt(ano),
+            editora, // Adicionado (se não estivesse antes)
+            capa_url // 👈 Adicionado
         });
         res.status(201).json({
             mensagem: "Livro criado com sucesso",
@@ -35,12 +41,16 @@ class LivrosController {
 
     async atualizarLivro(req, res, next) {
         const id = parseInt(req.params.id);
-        const { titulo, autor, categoria, ano } = req.body;
+        // 👈 Incluído capa_url na desestruturação
+        const { titulo, autor, categoria, ano, editora, capa_url } = req.body;
+        
         const livroAtualizado = await this.livrosRepository.update(id, {
             titulo,
             autor,
             categoria,
-            ano: parseInt(ano)
+            ano: parseInt(ano),
+            editora, // Adicionado (se não estivesse antes)
+            capa_url // 👈 Adicionado
         });
 
         res.status(200).json({
@@ -57,8 +67,6 @@ class LivrosController {
             data: livroRemovido
         });
     }
-
-
 }
 
 module.exports = LivrosController;

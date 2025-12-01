@@ -38,13 +38,14 @@ function query(sql, params = []) {
 function init() {
     run(`
         CREATE TABLE IF NOT EXISTS livros (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            titulo TEXT NOT NULL,
-            autor TEXT NOT NULL,
-            categoria TEXT NOT NULL,
-            ano INTEGER NOT NULL,
-            editora TEXT DEFAULT ''
-        )
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        titulo TEXT NOT NULL,
+        autor TEXT NOT NULL,
+        categoria TEXT NOT NULL,
+        ano INTEGER NOT NULL,
+        editora TEXT,
+        capa_url TEXT  -- 👈 DEVE ESTAR AQUI!
+    )
     `);
     run(`
         CREATE TABLE IF NOT EXISTS users (
@@ -55,7 +56,22 @@ function init() {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
-    console.log('Banco de dados SQLite inicializado (livros, users)');
+     run(`
+        CREATE TABLE IF NOT EXISTS review_livro (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario_id INTEGER NOT NULL,
+            livro_id INTEGER NOT NULL,
+            review TEXT,
+            nota INTEGER,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY (usuario_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (livro_id) REFERENCES livros(id) ON DELETE CASCADE,
+
+            UNIQUE (usuario_id, livro_id)
+        )
+    `);
+    console.log('Banco de dados SQLite inicializado (livros, users, review_livro)');
 }
 
 module.exports = { getDb, run, get, all, query, init };
