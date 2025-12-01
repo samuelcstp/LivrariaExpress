@@ -10,7 +10,7 @@ class ReviewModel {
         );
     }
 
-    // AJUSTADO: Inclui capa_url no SELECT do JOIN
+    // AJUSTADO: Inclui capa_caminho no SELECT do JOIN
     listarPorUser(usuarioId) {
         return db.all(
             `SELECT 
@@ -23,7 +23,7 @@ class ReviewModel {
                 l.titulo AS livro_titulo, 
                 l.autor AS livro_autor,
                 l.categoria AS livro_categoria,
-                l.capa_url AS livro_capa_url /* 👈 Adicionado capa_url */
+                l.capa_caminho AS livro_capa_caminho /* 👈 ALTERADO DE capa_url PARA capa_caminho */
              FROM review_livro r
              JOIN livros l ON r.livro_id = l.id
              WHERE r.usuario_id = ?
@@ -31,8 +31,6 @@ class ReviewModel {
             [usuarioId]
         );
     }
-
-    // ... (atualizarReview e removerReview não precisam de alteração)
 
     atualizarReview(id, usuarioId, review, nota) {
         return db.run(

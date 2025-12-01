@@ -44,7 +44,7 @@ function init() {
         categoria TEXT NOT NULL,
         ano INTEGER NOT NULL,
         editora TEXT,
-        capa_url TEXT  -- 👈 DEVE ESTAR AQUI!
+        capa_caminho TEXT
     )
     `);
     run(`

@@ -3,8 +3,8 @@ const RepositoryBase = require("./repository.interface");
 const db = require("../database/sqlite");
 const Livro = require("../models/livro.model");
 
-// Seleciona todos os campos, incluindo o novo
-const LIVRO_FIELDS = "id, titulo, autor, categoria, ano, editora, capa_url"; 
+// 💡 CAMPO MODIFICADO: capa_url -> capa_caminho
+const LIVRO_FIELDS = "id, titulo, autor, categoria, ano, editora, capa_caminho"; 
 
 class LivrosRepository extends RepositoryBase {
     constructor() {
@@ -12,27 +12,31 @@ class LivrosRepository extends RepositoryBase {
     }
 
     async findAll() {
-        const rows = db.all(`SELECT ${LIVRO_FIELDS} FROM livros ORDER BY id ASC`);
+        // Usamos await para garantir que db.all retorne a promise resolvida
+        const rows = await db.all(`SELECT ${LIVRO_FIELDS} FROM livros ORDER BY id ASC`);
         return rows.map(row => Livro.fromJSON(row));
     }
 
     async findById(id) {
-        const row = db.get(`SELECT ${LIVRO_FIELDS} FROM livros WHERE id = ?`, [id]);
+        const row = await db.get(`SELECT ${LIVRO_FIELDS} FROM livros WHERE id = ?`, [id]);
         return row ? Livro.fromJSON(row) : null;
     }
 
     async create(livroData) {
-        const novoLivro = new Livro({ id: null, ...livroData });
-        const result = db.run(
-            `INSERT INTO livros (titulo, autor, categoria, ano, editora, capa_url) 
-             VALUES (?, ?, ?, ?, ?, ?)`, // 👈 Adicionado capa_url
+        // O livroData já está validado pelo Controller e contém capa_caminho
+        const { titulo, autor, categoria, ano, editora, capa_caminho } = livroData; 
+        
+        // 💡 SQL MODIFICADO: capa_url -> capa_caminho
+        const result = await db.run(
+            `INSERT INTO livros (titulo, autor, categoria, ano, editora, capa_caminho) 
+             VALUES (?, ?, ?, ?, ?, ?)`, 
             [
-                novoLivro.titulo, 
-                novoLivro.autor, 
-                novoLivro.categoria, 
-                novoLivro.ano, 
-                novoLivro.editora, 
-                novoLivro.capa_url // 👈 Adicionado
+                titulo, 
+                autor, 
+                categoria, 
+                ano, 
+                editora, 
+                capa_caminho // ⬅️ Usando capa_caminho
             ]
         );
         return this.findById(result.lastInsertRowid);
@@ -46,19 +50,22 @@ class LivrosRepository extends RepositoryBase {
             error.statusCode = 404;
             throw error;
         }
-        const atualizado = new Livro({ ...existente.toJSON(), ...dadosAtualizados });
         
-        db.run(
+        // Assume que dadosAtualizados é um objeto Livro validado pelo Controller
+        const { titulo, autor, categoria, ano, editora, capa_caminho } = dadosAtualizados;
+        
+        // 💡 SQL MODIFICADO: capa_url -> capa_caminho
+        await db.run(
             `UPDATE livros 
-             SET titulo = ?, autor = ?, categoria = ?, ano = ?, editora = ?, capa_url = ? 
-             WHERE id = ?`, // 👈 Adicionado capa_url no SET
+             SET titulo = ?, autor = ?, categoria = ?, ano = ?, editora = ?, capa_caminho = ? 
+             WHERE id = ?`, 
             [
-                atualizado.titulo, 
-                atualizado.autor, 
-                atualizado.categoria, 
-                atualizado.ano, 
-                atualizado.editora, 
-                atualizado.capa_url, // 👈 Adicionado
+                titulo, 
+                autor, 
+                categoria, 
+                ano, 
+                editora, 
+                capa_caminho, // ⬅️ Usando capa_caminho
                 id
             ]
         );
@@ -66,13 +73,14 @@ class LivrosRepository extends RepositoryBase {
     }
 
     async delete(id) {
-        const existente = await this.findById(id); // Use await aqui para garantir que o objeto seja retornado
+        // Retorna o objeto existente para que o Controller possa deletar o arquivo da capa
+        const existente = await this.findById(id); 
         if (!existente) {
             const error = new Error("Livro não encontrado");
             error.statusCode = 404;
             throw error;
         }
-        db.run("DELETE FROM livros WHERE id = ?", [id]);
+        await db.run("DELETE FROM livros WHERE id = ?", [id]);
         return existente;
     }
 }

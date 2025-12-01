@@ -1,33 +1,34 @@
-// src/models/livro.model.js (COMPLETO E CORRIGIDO)
-const db = require("../database/sqlite"); // Assumindo que você usa isso em outros lugares
+// src/models/livro.model.js (CORRIGIDO PARA FORM DATA)
 
 class Livro {
-    constructor({ id = null, titulo, autor, categoria, ano, editora = '', capa_url = '' }) {
+   constructor({ id = null, titulo, autor, categoria, ano, editora = '', capa_caminho = '' }) {
         this.id = id !== undefined ? id : null;
         
         // Campos obrigatórios:
-        this.titulo = String(titulo).trim();
-        this.autor = String(autor).trim();
-        this.categoria = String(categoria).trim();
-        this.ano = Number.isInteger(ano) ? ano : parseInt(ano, 10);
+        this.titulo = String(titulo || '').trim();
+        this.autor = String(autor || '').trim();
+        this.categoria = String(categoria || '').trim();
         
-        // Campos opcionais (Segurança contra null/undefined do DB):
-        this.editora = (editora !== null && editora !== undefined) ? String(editora).trim() : '';
-        this.capa_url = (capa_url !== null && capa_url !== undefined) ? String(capa_url).trim() : '';
+        // 💡 CORREÇÃO 1: Trata 'ano' como string para converter
+        const anoString = String(ano).trim();
+        this.ano = anoString ? parseInt(anoString, 10) : NaN; // NaN se for vazio
+
+        // Campos opcionais:
+        this.editora = String(editora || '').trim();
+        this.capa_caminho = String(capa_caminho || '').trim();
 
         this._validar();
     }
 
     static fromJSON(json) {
         return new Livro({
-            // Usamos ?? (nullish coalescing) para garantir que null/undefined se tornem null, mas o construtor já trata isso
             id: json.id ?? null,
             titulo: json.titulo,
             autor: json.autor,
             categoria: json.categoria,
             ano: json.ano,
             editora: json.editora,
-            capa_url: json.capa_url
+            capa_caminho: json.capa_caminho 
         });
     }
 
@@ -39,21 +40,26 @@ class Livro {
             categoria: this.categoria,
             ano: this.ano,
             editora: this.editora,
-            capa_url: this.capa_url
+            capa_caminho: this.capa_caminho
         };
     }
 
     _validar() {
         const erros = [];
 
-        if (!this.titulo || this.titulo.trim().length === 0) erros.push("Título é obrigatório");
-        if (!this.autor || this.autor.trim().length === 0) erros.push("Autor é obrigatório");
-        if (!this.categoria || this.categoria.trim().length === 0) erros.push("Categoria é obrigatória");
-        if (!Number.isInteger(this.ano) || isNaN(this.ano)) erros.push("Ano deve ser um número válido");
+        if (!this.titulo || this.titulo.length === 0) erros.push("Título é obrigatório");
+        if (!this.autor || this.autor.length === 0) erros.push("Autor é obrigatório");
+        if (!this.categoria || this.categoria.length === 0) erros.push("Categoria é obrigatória");
+        
+        // 💡 CORREÇÃO 2: A validação agora checa se é um número inteiro válido
+        if (isNaN(this.ano) || !Number.isInteger(this.ano)) erros.push("Ano deve ser um número válido");
+        
+        // Adiciona validação de range, se necessário (ex: ano ser maior que 1000)
+        if (Number.isInteger(this.ano) && this.ano < 1000) erros.push("Ano inválido");
 
         if (erros.length > 0) {
             const error = new Error("Dados inválidos");
-            error.statusCode = 400; // 🚨 Gera um 400 que o Controller deve capturar!
+            error.statusCode = 400; 
             error.details = erros;
             throw error;
         }
