@@ -9,23 +9,30 @@ class AuthController {
 
     async register(req, res, next) {
         try {
-            const { username, password } = req.body;
-            const userInput = new User({ username, password });
-            const existing = await this.usersRepository.findByUsername(userInput.username);
-            if (existing) { const e = new Error('Usuário já existe'); e.statusCode = 409; throw e; }
+            const { username, email, password } = req.body;
+            const userInput = new User({ username, email, password });
+
+            // Verifica se username já existe
+            const existingUsername = await this.usersRepository.findByUsername(userInput.username);
+            if (existingUsername) { const e = new Error('Nome de usuário já existe'); e.statusCode = 409; throw e; }
+
+            // Verifica se email já existe
+            const existingEmail = await this.usersRepository.findByEmail(userInput.email);
+            if (existingEmail) { const e = new Error('Email já cadastrado'); e.statusCode = 409; throw e; }
+
             const passwordHash = await bcrypt.hash(String(password), 10);
-            const created = await this.usersRepository.create({ username: userInput.username, passwordHash });
+            const created = await this.usersRepository.create({ username: userInput.username, email: userInput.email, passwordHash });
             req.session.userId = created.id;
             res.status(201).json({ mensagem: 'Usuário registrado com sucesso', user: created });
         } catch (err) { next(err); }
     }
     async login(req, res, next) {
         try {
-            const { username, password } = req.body;
-            if (!username || !password) { const e = new Error('Credenciais inválidas'); e.statusCode = 400; throw e; }
-            const row = await this.usersRepository.findByUsername(username);
+            const { email, password } = req.body;
+            if (!email || !password) { const e = new Error('Credenciais inválidas'); e.statusCode = 400; throw e; }
+            const row = await this.usersRepository.findByEmail(email);
             if (!row || !(await bcrypt.compare(String(password), row.password_hash))) {
-                const e = new Error('Usuário ou senha inválidos'); e.statusCode = 401; throw e;
+                const e = new Error('Email ou senha inválidos'); e.statusCode = 401; throw e;
             }
             req.session.userId = row.id;
             const user = User.fromDB(row);
