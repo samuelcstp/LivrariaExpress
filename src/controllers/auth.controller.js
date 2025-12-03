@@ -1,6 +1,9 @@
+// src/controllers/auth.controller.js
 const bcrypt = require('bcrypt');
 const UsersRepository = require('../repositories/users.repository');
 const User = require('../models/user.model');
+const jwt = require('jsonwebtoken'); // 💡 Importar JWT
+const { enviarEmailRecuperacao } = require('../services/email.service'); // 💡 Importar Serviço de E-mail
 
 class AuthController {
     constructor() {
@@ -26,6 +29,7 @@ class AuthController {
             res.status(201).json({ mensagem: 'Usuário registrado com sucesso', user: created });
         } catch (err) { next(err); }
     }
+    
     async login(req, res, next) {
         try {
             const { email, password } = req.body;
@@ -49,10 +53,73 @@ class AuthController {
         } catch (err) { next(err); }
     }
 
-
     async logout(req, res, next) {
         try { req.session.destroy(err => err ? next(err) : res.status(200).json({ mensagem: 'Logout realizado com sucesso.' })); }
         catch (err) { next(err); }
+    }
+
+    // 💡 NOVO MÉTODO: SOLICITAR RECUPERAÇÃO DE SENHA
+    async forgotPassword(req, res, next) {
+        try {
+            const { email } = req.body;
+            const userRow = await this.usersRepository.findByEmail(email);
+
+            // Responde 200/OK mesmo se o usuário não for encontrado por segurança (evitar enumeração)
+            if (!userRow) {
+                return res.status(200).json({ mensagem: 'Se o e-mail estiver cadastrado, um link de recuperação será enviado.' });
+            }
+
+            // 1. Geração do Token JWT (Expira em 1h)
+            const token = jwt.sign({ id: userRow.id }, process.env.RESET_SECRET, { expiresIn: '1h' });
+
+            // 2. Envio do E-mail
+            await enviarEmailRecuperacao(userRow.email, token);
+
+            res.status(200).json({ mensagem: 'Link de recuperação enviado para seu e-mail.' });
+
+        } catch (err) {
+            console.error('Erro no forgotPassword:', err);
+            // Se o erro for no envio do e-mail, ainda assim retornamos 500
+            const e = new Error('Não foi possível enviar o e-mail de recuperação.'); e.statusCode = 500;
+            next(e);
+        }
+    }
+
+    // 💡 NOVO MÉTODO: REDEFINIR SENHA
+    async resetPassword(req, res, next) {
+       try {
+            const { token, newPassword } = req.body;
+            
+            // 1. Validação básica de entrada
+            if (!token || !newPassword) { 
+                const e = new Error('Token e nova senha são obrigatórios.'); e.statusCode = 400; throw e; 
+            }
+
+            // 2. Validação básica da senha (Melhor mover para uma função utilitária, mas aqui resolve)
+            if (String(newPassword).length < 6) { // Exemplo de regra
+                const e = new Error('A nova senha deve ter pelo menos 6 caracteres.'); e.statusCode = 400; throw e;
+            }
+
+            // 3. Verificação do Token
+            const decoded = jwt.verify(token, process.env.RESET_SECRET);
+            const userId = decoded.id;
+
+            // 4. Hashing da nova senha e atualização no banco
+            const passwordHash = await bcrypt.hash(String(newPassword), 10);
+            await this.usersRepository.updatePassword(userId, passwordHash);
+
+            res.status(200).json({ mensagem: 'Senha redefinida com sucesso! Você já pode fazer login.' });
+
+        } catch (err) {
+            if (err.name === 'TokenExpiredError') {
+                const e = new Error('O link de recuperação expirou.'); e.statusCode = 401; next(e); return;
+            }
+            if (err.name === 'JsonWebTokenError') {
+                const e = new Error('Token de recuperação inválido.'); e.statusCode = 401; next(e); return;
+            }
+            // Erros de validação (400) ou outros erros internos (500)
+            next(err); 
+        }
     }
 }
 

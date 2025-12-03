@@ -1,3 +1,5 @@
+// src/repositories/users.repository.js
+
 const db = require('../database/sqlite');
 const User = require('../models/user.model');
 
@@ -6,20 +8,35 @@ class UsersRepository {
         const row = await db.get('SELECT id, username, email, created_at FROM users WHERE id = ?', [id]);
         return row ? User.fromDB(row) : null;
     }
+    
     async findByUsername(username) {
         const row = await db.get('SELECT id, username, email, password_hash, created_at FROM users WHERE username = ?', [username]);
         return row || null; // inclui password_hash
     }
+    
     async findByEmail(email) {
         const row = await db.get('SELECT id, username, email, password_hash, created_at FROM users WHERE email = ?', [email.toLowerCase()]);
         return row || null; // inclui password_hash
     }
+    
     async create({ username, email, passwordHash }) {
         const result = await db.run('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)', [username, email.toLowerCase(), passwordHash]);
         console.log(result);
 
         const row = await db.get('SELECT id, username, email, created_at FROM users WHERE id = ?', [result.lastInsertRowid]);
         return User.fromDB(row);
+    }
+    
+    // 💡 NOVO MÉTODO: Atualiza a hash da senha de um usuário específico
+    async updatePassword(userId, passwordHash) {
+        // Executa o comando UPDATE no banco de dados SQLite
+        const result = await db.run(
+            'UPDATE users SET password_hash = ? WHERE id = ?',
+            [passwordHash, userId]
+        );
+        
+        // Retorna o número de linhas modificadas (idealmente 1)
+        return result.changes;
     }
 }
 
