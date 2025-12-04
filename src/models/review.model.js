@@ -10,7 +10,6 @@ class ReviewModel {
         );
     }
 
-    // AJUSTADO: Inclui capa_caminho no SELECT do JOIN
     listarPorUser(usuarioId) {
         return db.all(
             `SELECT 

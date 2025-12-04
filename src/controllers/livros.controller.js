@@ -1,7 +1,7 @@
 const LivrosRepository = require("../repositories/livros.repository");
-const Livro = require("../models/livro.model"); // Seu modelo
-const fs = require('fs'); // Para deletar arquivos
-const path = require('path'); // Para construir o caminho completo para deletar
+const Livro = require("../models/livro.model"); 
+const fs = require('fs'); 
+const path = require('path'); 
 
 class LivrosController {
     constructor() {
@@ -27,7 +27,7 @@ class LivrosController {
     }
 
     async criarLivro(req, res, next) {
-        // 💡 1. Captura o arquivo do Multer e define o caminho
+        // 1. Captura o arquivo do Multer e define o caminho
         const capaFile = req.file; 
         const capaCaminho = capaFile ? `uploads/livros/${capaFile.filename}` : null;
         
@@ -54,7 +54,7 @@ class LivrosController {
             });
 
         } catch (err) { 
-            // 🛑 5. Em caso de erro (ex: validação), DELETA o arquivo que o Multer salvou
+            // 5. Em caso de erro (ex: validação), DELETA o arquivo que o Multer salvou
             if (capaFile) {
                 fs.unlink(capaFile.path, () => {}); 
             }
@@ -65,7 +65,7 @@ class LivrosController {
     async atualizarLivro(req, res, next) {
         const id = parseInt(req.params.id);
         
-        // 💡 1. Captura o novo arquivo do Multer (se houver)
+        // 1. Captura o novo arquivo do Multer (se houver)
         const novaCapaFile = req.file;
         let novaCapaCaminho = novaCapaFile ? `uploads/livros/${novaCapaFile.filename}` : null;
         
@@ -99,7 +99,7 @@ class LivrosController {
                 ...existente.toJSON(), // Dados antigos
                 titulo, autor, categoria, 
                 ano: parseInt(ano), editora,
-                capa_caminho: novaCapaCaminho // ⬅️ O novo caminho
+                capa_caminho: novaCapaCaminho
             });
 
             // 4. Atualiza no DB
@@ -111,7 +111,7 @@ class LivrosController {
             });
 
         } catch (err) {
-            // 🛑 5. Em caso de erro na atualização, deleta o arquivo recém-subido
+            // 5. Em caso de erro na atualização, deleta o arquivo recém-subido
             if (novaCapaFile) {
                 fs.unlink(novaCapaFile.path, () => {});
             }
@@ -125,7 +125,7 @@ class LivrosController {
             // 1. Deleta do DB, mas retorna o objeto para pegar o caminho da capa
             const livroRemovido = await this.livrosRepository.delete(id);
             
-            // 🛑 2. Deleta o arquivo da capa do disco
+            // 2. Deleta o arquivo da capa do disco
             if (livroRemovido && livroRemovido.capa_caminho) {
                 const fullPath = path.resolve(__dirname, '..', '..', livroRemovido.capa_caminho);
                 fs.unlink(fullPath, (err) => {

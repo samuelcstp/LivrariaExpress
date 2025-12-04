@@ -1,19 +1,14 @@
-// src/config/upload.js
-
 const multer = require('multer');
 const path = require('path');
 const crypto = require('crypto');
 
-// ----------------------------------------------------
-// 1. Configuração do Armazenamento (Disk Storage)
-// ----------------------------------------------------
+
 const storage = multer.diskStorage({
     
     // Define o diretório de destino: 
     // Vai para a pasta 'uploads/livros' que fica dois níveis acima (../..)
     // da pasta 'config' (onde este arquivo está).
     destination: (req, file, cb) => {
-        // Ex: /LivrariaExpress/uploads/livros
         cb(null, path.resolve(__dirname, '..', '..', 'uploads', 'livros'));
     },
     
@@ -33,12 +28,9 @@ const storage = multer.diskStorage({
     },
 });
 
-// ----------------------------------------------------
-// 2. Exporta o Middleware do Multer
-// ----------------------------------------------------
+
 module.exports = multer({ 
     storage,
-    // 💡 Opcional: Define limites para o tamanho do arquivo
     limits: {
         fileSize: 5 * 1024 * 1024 // 5MB (limite comum para imagens)
     }

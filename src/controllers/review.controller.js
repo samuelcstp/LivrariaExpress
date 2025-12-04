@@ -4,7 +4,6 @@ const repo = new ReviewRepository();
 class ReviewController {
     async criarReview(req, res) {
         try {
-            // 🔒 Pega o ID do usuário logado da sessão, não do body
             const usuarioId = req.session.userId; 
             const { livroId, review, nota } = req.body;
 
@@ -26,10 +25,8 @@ class ReviewController {
         }
     }
 
-    // AJUSTADO para listar as reviews do usuário logado
     async listarMinhasReviews(req, res) {
         try {
-            // 🔒 Pega o ID do usuário logado da sessão
             const usuarioId = req.session.userId;
 
             const reviews = await repo.findByUser(usuarioId);
@@ -42,12 +39,9 @@ class ReviewController {
 
     async atualizarReview(req, res) {
         try {
-            const id = req.params.id; // ID da review
-            // 🔒 Pega o ID do usuário logado da sessão para autorização
+            const id = req.params.id; 
             const usuarioId = req.session.userId; 
             const { review, nota } = req.body;
-
-            // ⚠️ Passa o usuarioId para garantir que o usuário só edite a própria review
             const resultado = await repo.update(id, usuarioId, { review, nota });
             
             if (resultado.changes === 0) {
@@ -68,11 +62,8 @@ class ReviewController {
 
     async removerReview(req, res) {
         try {
-            const id = req.params.id; // ID da review
-            // 🔒 Pega o ID do usuário logado da sessão para autorização
+            const id = req.params.id;
             const usuarioId = req.session.userId; 
-
-            // ⚠️ Passa o usuarioId para garantir que o usuário só remova a própria review
             const resultado = await repo.delete(id, usuarioId);
 
              if (resultado.changes === 0) {

@@ -1,5 +1,3 @@
-// src/models/livro.model.js (CORRIGIDO PARA FORM DATA)
-
 class Livro {
    constructor({ id = null, titulo, autor, categoria, ano, editora = '', capa_caminho = '' }) {
         this.id = id !== undefined ? id : null;
@@ -8,8 +6,7 @@ class Livro {
         this.titulo = String(titulo || '').trim();
         this.autor = String(autor || '').trim();
         this.categoria = String(categoria || '').trim();
-        
-        // 💡 CORREÇÃO 1: Trata 'ano' como string para converter
+
         const anoString = String(ano).trim();
         this.ano = anoString ? parseInt(anoString, 10) : NaN; // NaN se for vazio
 
@@ -50,8 +47,7 @@ class Livro {
         if (!this.titulo || this.titulo.length === 0) erros.push("Título é obrigatório");
         if (!this.autor || this.autor.length === 0) erros.push("Autor é obrigatório");
         if (!this.categoria || this.categoria.length === 0) erros.push("Categoria é obrigatória");
-        
-        // 💡 CORREÇÃO 2: A validação agora checa se é um número inteiro válido
+
         if (isNaN(this.ano) || !Number.isInteger(this.ano)) erros.push("Ano deve ser um número válido");
         
         // Adiciona validação de range, se necessário (ex: ano ser maior que 1000)

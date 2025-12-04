@@ -2,8 +2,8 @@
 const bcrypt = require('bcrypt');
 const UsersRepository = require('../repositories/users.repository');
 const User = require('../models/user.model');
-const jwt = require('jsonwebtoken'); // 💡 Importar JWT
-const { enviarEmailRecuperacao } = require('../services/email.service'); // 💡 Importar Serviço de E-mail
+const jwt = require('jsonwebtoken');
+const { enviarEmailRecuperacao } = require('../services/email.service'); 
 
 class AuthController {
     constructor() {
@@ -58,7 +58,6 @@ class AuthController {
         catch (err) { next(err); }
     }
 
-    // 💡 NOVO MÉTODO: SOLICITAR RECUPERAÇÃO DE SENHA
     async forgotPassword(req, res, next) {
         try {
             const { email } = req.body;
@@ -85,7 +84,6 @@ class AuthController {
         }
     }
 
-    // 💡 NOVO MÉTODO: REDEFINIR SENHA
     async resetPassword(req, res, next) {
        try {
             const { token, newPassword } = req.body;

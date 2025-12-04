@@ -4,7 +4,6 @@ const router = express.Router();
 const ReviewController = require("../controllers/review.controller");
 const controller = new ReviewController();
 
-// 🚨 Supondo que o seu middleware de autenticação está em ../middlewares/auth
 const { requireAuth } = require("../middlewares/auth"); 
 
 // Importa a validação de ID (que é para o ID da review, não do usuário)

@@ -3,7 +3,6 @@ const RepositoryBase = require("./repository.interface");
 const db = require("../database/sqlite");
 const Livro = require("../models/livro.model");
 
-// 💡 CAMPO MODIFICADO: capa_url -> capa_caminho
 const LIVRO_FIELDS = "id, titulo, autor, categoria, ano, editora, capa_caminho"; 
 
 class LivrosRepository extends RepositoryBase {
@@ -12,7 +11,7 @@ class LivrosRepository extends RepositoryBase {
     }
 
     async findAll() {
-        // Usamos await para garantir que db.all retorne a promise resolvida
+        //await para garantir que db.all retorne a promise resolvida
         const rows = await db.all(`SELECT ${LIVRO_FIELDS} FROM livros ORDER BY id ASC`);
         return rows.map(row => Livro.fromJSON(row));
     }
@@ -23,10 +22,7 @@ class LivrosRepository extends RepositoryBase {
     }
 
     async create(livroData) {
-        // O livroData já está validado pelo Controller e contém capa_caminho
         const { titulo, autor, categoria, ano, editora, capa_caminho } = livroData; 
-        
-        // 💡 SQL MODIFICADO: capa_url -> capa_caminho
         const result = await db.run(
             `INSERT INTO livros (titulo, autor, categoria, ano, editora, capa_caminho) 
              VALUES (?, ?, ?, ?, ?, ?)`, 
@@ -36,7 +32,7 @@ class LivrosRepository extends RepositoryBase {
                 categoria, 
                 ano, 
                 editora, 
-                capa_caminho // ⬅️ Usando capa_caminho
+                capa_caminho
             ]
         );
         return this.findById(result.lastInsertRowid);
@@ -53,8 +49,6 @@ class LivrosRepository extends RepositoryBase {
         
         // Assume que dadosAtualizados é um objeto Livro validado pelo Controller
         const { titulo, autor, categoria, ano, editora, capa_caminho } = dadosAtualizados;
-        
-        // 💡 SQL MODIFICADO: capa_url -> capa_caminho
         await db.run(
             `UPDATE livros 
              SET titulo = ?, autor = ?, categoria = ?, ano = ?, editora = ?, capa_caminho = ? 
@@ -65,7 +59,7 @@ class LivrosRepository extends RepositoryBase {
                 categoria, 
                 ano, 
                 editora, 
-                capa_caminho, // ⬅️ Usando capa_caminho
+                capa_caminho,
                 id
             ]
         );
