@@ -22,7 +22,7 @@ class ReviewModel {
                 l.titulo AS livro_titulo, 
                 l.autor AS livro_autor,
                 l.categoria AS livro_categoria,
-                l.capa_caminho AS livro_capa_caminho /* 👈 ALTERADO DE capa_url PARA capa_caminho */
+                l.capa_caminho AS livro_capa_caminho
              FROM review_livro r
              JOIN livros l ON r.livro_id = l.id
              WHERE r.usuario_id = ?

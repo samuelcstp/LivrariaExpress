@@ -11,12 +11,12 @@ class ReviewRepository {
         return model.listarPorUser(usuarioId);
     }
 
-    // AJUSTADO: Recebe usuarioId para garantir autorização no Model
+    //Recebe usuarioId para garantir autorização no Model
     async update(id, usuarioId, { review, nota }) { 
         return model.atualizarReview(id, usuarioId, review, nota);
     }
 
-    // AJUSTADO: Recebe usuarioId para garantir autorização no Model
+    //Recebe usuarioId para garantir autorização no Model
     async delete(id, usuarioId) { 
         return model.removerReview(id, usuarioId);
     }

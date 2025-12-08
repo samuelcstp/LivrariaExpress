@@ -12,7 +12,7 @@ router.post('/login', (req, res, next) => authController.login(req, res, next));
 router.get('/me', requireAuth, (req, res, next) => authController.me(req, res, next));
 router.post('/logout', requireAuth, (req, res, next) => authController.logout(req, res, next));
 
-// 💡 NOVAS ROTAS DE RECUPERAÇÃO DE SENHA
+//ROTAS DE RECUPERAÇÃO DE SENHA
 router.post('/forgot-password', (req, res, next) => authController.forgotPassword(req, res, next));
 router.put('/reset-password', (req, res, next) => authController.resetPassword(req, res, next));
 

@@ -27,7 +27,7 @@ class UsersRepository {
         return User.fromDB(row);
     }
     
-    // 💡 NOVO MÉTODO: Atualiza a hash da senha de um usuário específico
+    //Atualiza a hash da senha de um usuário específico
     async updatePassword(userId, passwordHash) {
         // Executa o comando UPDATE no banco de dados SQLite
         const result = await db.run(
