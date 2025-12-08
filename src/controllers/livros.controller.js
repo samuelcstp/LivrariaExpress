@@ -42,7 +42,7 @@ class LivrosController {
                 categoria,
                 ano: parseInt(ano),
                 editora,
-                capa_caminho: capaCaminho // ⬅️ Usando o caminho local
+                capa_caminho: capaCaminho // Usando o caminho local
             });
 
             // 4. Salva no banco de dados
