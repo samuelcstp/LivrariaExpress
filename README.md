@@ -1,3 +1,13 @@
+Projeto Livraria Express
+
+Este projeto é uma aplicação de livraria completa, permitindo o gerenciamento de livros e reviews. Possui um sistema de autenticação com **Express Sessions**, suporte a **Tema Dark/Light** e fluxo de **Recuperação de Senha** via e-mail.
+
+## Configuração do Backend
+
+1. **Acesse a pasta do backend:**
+   ```bash
+   cd backLivraria
+
 ## Instalação e Configuração
 
 ### Instale as dependências
@@ -12,7 +22,7 @@ RESET_SECRET=seu_segredo_jwt_reset
 EMAIL_USER=seu_email@gmail.com
 EMAIL_PASS=sua_senha_de_app_google
 ```
-###Inicie o servidor: Bash npm start O servidor rodará em: http://localhost:3333
+###Inicie o servidor:
 ```bash
 npm start
 ```
