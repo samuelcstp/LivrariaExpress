@@ -1,4 +1,4 @@
-Projeto Livraria Express
+#Projeto Livraria Express
 
 Este projeto é uma aplicação de livraria completa, permitindo o gerenciamento de livros e reviews. Possui um sistema de autenticação com **Express Sessions**, suporte a **Tema Dark/Light** e fluxo de **Recuperação de Senha** via e-mail.
 
