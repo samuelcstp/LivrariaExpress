@@ -32,7 +32,7 @@ O servidor rodará em: http://localhost:3333
 
 O servidor segue o padrão **Controller–Repository**, separando regras de negócio das consultas ao banco para manter o código organizado e fácil de manter.
 
-### Principais pastas e arquivos (`src/`)
+### Principais pastas e arquivos adicionados (`src/`)
 
 - **controllers/auth.controller.js**  
   Gerencia o ciclo de vida do usuário (login, registro, logout).  
