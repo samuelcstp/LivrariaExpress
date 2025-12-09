@@ -45,7 +45,7 @@ O servidor segue o padrão **Controller–Repository**, separando regras de neg�
   Possui o método `updatePassword`, responsável por salvar a nova senha criptografada no banco.
 
 - **models/user.model.js**  
-  Define o modelo do usuário e centraliza as validações (regex de e-mail, força de senha, sanitização etc).
+  Define o modelo do usuário e centraliza as validações.
 
 - **services/email.service.js**  
   Configura o Nodemailer e envia os e-mails com links seguros de recuperação de senha.
